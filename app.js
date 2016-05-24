@@ -1,23 +1,17 @@
-var express = require('express');
-var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-var port = process.env.PORT || 3000;
+var restify = require('restify');
+var builder = require('botbuilder');
 
-app.get('/', function(req, res)
+// Create bot and add dialogs
+var bot = new builder.BotConnectorBot({ appId: 'samplenodejsbot', appSecret: 'f2a901a548c1436eb9428627fbf11965' });
+bot.add('/', function (session)
 {
-	res.sendFile(__dirname + '/index.html');
+	session.send('Hello World');
 });
 
-io.on('connection', function(socket)
+// Setup Restify Server
+var server = restify.createServer();
+server.post('/api/messages', bot.verifyBotFramework(), bot.listen());
+server.listen(process.env.port || 3978, function ()
 {
-	socket.on('chat message', function(msg)
-	{
-		io.emit('chat message', msg);
-	});
-});
-
-http.listen(port, function()
-{
-	console.log('listening on ' + port);
+	console.log('%s listening to %s', server.name, server.url); 
 });
